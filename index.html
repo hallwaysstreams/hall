@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Fuel & Mileage Tracker</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #eef2f7, #f9fbfd);
+    color: #2c3e50;
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+header {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+    padding: 28px;
+    border-radius: 14px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+h1 {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 2.3rem;
+}
+
+.subtitle {
+    opacity: 0.9;
+    margin-top: 8px;
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+@media (max-width: 900px) {
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background: rgba(255,255,255,0.97);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+    transition: 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 38px rgba(0,0,0,0.12);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 2px solid #f1f1f1;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.input-icon {
+    position: relative;
+}
+
+.input-icon i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #95a5a6;
+}
+
+.input-icon input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+}
+
+.input-icon input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+button {
+    background: linear-gradient(135deg, #3498db, #1d6fa5);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    transition: 0.15s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(52,152,219,0.4);
+}
+
+.btn-secondary {
+    background: #7f8c8d;
+}
+
+.month-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.month-btn {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.stat-box {
+    background: linear-gradient(135deg, #ffffff, #f4f6f8);
+    padding: 22px;
+    border-radius: 14px;
+    text-align: center;
+    border-left: 5px solid #3498db;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+}
+
+.stat-value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background: #f7f9fb;
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: #7f8c8d;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2><i class="fas fa-car"></i> Hall Fuel & Mileage Tracker</h2>
+    <p class="subtitle">Track fuel purchases, mileage & monthly performance</p>
+</header>
+
+<div class="app-container">
+
+<!-- LEFT -->
+<div>
+<div class="card">
+<h2 class="card-title"><i class="fas fa-gas-pump"></i> Log Trip</h2>
+
+<form id="fuelForm">
+
+<div class="form-group">
+<label>Date</label>
+<div class="input-icon">
+<i class="far fa-calendar"></i>
+<input type="date" id="date" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Registration Plate</label>
+<div class="input-icon">
+<i class="fas fa-car"></i>
+<input type="text" id="registrationPlate" placeholder="ABC-1234" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Odometer Start (km)</label>
+<div class="input-icon">
+<i class="fas fa-gauge-high"></i>
+<input type="number" id="odometerStart" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Odometer End (km)</label>
+<div class="input-icon">
+<i class="fas fa-gauge"></i>
+<input type="number" id="odometerEnd" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Fuel Purchased (L)</label>
+<div class="input-icon">
+<i class="fas fa-gas-pump"></i>
+<input type="number" id="fuelAmount" step="0.01" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Fuel Cost ($)</label>
+<div class="input-icon">
+<i class="fas fa-dollar-sign"></i>
+<input type="number" id="fuelCost" step="0.01" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Notes</label>
+<div class="input-icon">
+<i class="far fa-note-sticky"></i>
+<input type="text" id="notes">
+</div>
+</div>
+
+<button type="submit">
+<i class="fas fa-save"></i> Save Entry
+</button>
+
+</form>
+</div>
+</div>
+
+<!-- RIGHT -->
+<div>
+<div class="card">
+<h2 class="card-title"><i class="fas fa-chart-bar"></i> Monthly Summary</h2>
+<div id="monthlyStats"></div>
+</div>
+
+<div class="card">
+<h2 class="card-title"><i class="fas fa-history"></i> Recent Entries</h2>
+<div id="recentEntries"></div>
+</div>
+</div>
+
+</div>
+
+<footer>
+<p>&copy; <span id="currentYear"></span> Vehicle Fuel & Mileage Tracker</p>
+</footer>
+
+<script>
+document.getElementById("currentYear").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
