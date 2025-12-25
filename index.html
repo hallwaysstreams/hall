@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Fuel & Mileage Tracker</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif}
+
+body{
+    background:linear-gradient(135deg,#eef2f7,#f9fbfd);
+    color:#2c3e50;
+    padding:20px;
+    max-width:1200px;
+    margin:auto
+}
+
+header{
+    background:linear-gradient(135deg,#2c3e50,#34495e);
+    color:#fff;
+    padding:28px;
+    border-radius:16px;
+    margin-bottom:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,.15)
+}
+
+h1{display:flex;gap:12px;align-items:center;font-size:2.2rem}
+.subtitle{opacity:.9;margin-top:6px}
+
+.app-container{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px
+}
+@media(max-width:900px){.app-container{grid-template-columns:1fr}}
+
+.card{
+    background:#fff;
+    border-radius:16px;
+    padding:28px;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+    margin-bottom:25px
+}
+
+.card-title{
+    font-size:1.4rem;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:20px;
+    border-bottom:2px solid #f1f1f1;
+    padding-bottom:10px
+}
+
+.form-group{margin-bottom:18px}
+label{font-weight:600;margin-bottom:6px;display:block}
+
+.input-icon{position:relative}
+.input-icon i{
+    position:absolute;
+    top:50%;
+    left:14px;
+    transform:translateY(-50%);
+    color:#95a5a6
+}
+.input-icon input{
+    width:100%;
+    padding:12px 14px 12px 42px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    font-size:1rem
+}
+.input-icon input:focus{outline:none;border-color:#3498db}
+
+button{
+    background:linear-gradient(135deg,#3498db,#1d6fa5);
+    color:#fff;
+    border:none;
+    padding:15px;
+    border-radius:10px;
+    font-size:1rem;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    width:100%
+}
+
+.buttons-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.buttons-group button {
+    flex: 1;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6c757d, #545b62);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+}
+
+.summary-stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px
+}
+.stat-box{
+    background:linear-gradient(135deg,#fff,#f4f6f8);
+    padding:22px;
+    border-radius:14px;
+    text-align:center;
+    border-left:5px solid #3498db
+}
+.stat-value{font-size:1.8rem;font-weight:700;margin:10px 0}
+.stat-label{font-size:.85rem;color:#7f8c8d;text-transform:uppercase}
+
+.efficiency-box {
+    background: linear-gradient(135deg, #fff, #f4f6f8);
+    padding: 22px;
+    border-radius: 14px;
+    text-align: center;
+    border-left: 5px solid #28a745;
+    margin-top: 15px;
+}
+
+#recentEntries{overflow-x:auto;min-height:80px}
+#recentEntries table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:center}
+th{background:#f7f9fb}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: #212529;
+}
+
+.delete-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.no-data{text-align:center;color:#7f8c8d;padding:30px}
+
+footer{text-align:center;margin-top:40px;color:#7f8c8d;font-size:.9rem}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.confirmation-modal .modal-content {
+    text-align: center;
+    padding: 40px;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.confirmation-buttons button {
+    flex: 1;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1><i class="fas fa-car"></i> Hall Fuel & Mileage Tracker</h1>
+<p class="subtitle">Track fuel usage, mileage & monthly performance</p>
+</header>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
+
+<div class="app-container">
+
+<!-- LEFT -->
+<div class="card">
+<h2 class="card-title"><i class="fas fa-gas-pump"></i> Log Trip</h2>
+
+<form id="fuelForm">
+<div class="form-group">
+<label>Date</label>
+<div class="input-icon">
+<i class="far fa-calendar"></i>
+<input type="date" id="date" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Registration Plate</label>
+<div class="input-icon">
+<i class="fas fa-car"></i>
+<input type="text" id="registrationPlate" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Odometer Start (km)</label>
+<div class="input-icon">
+<i class="fas fa-gauge-high"></i>
+<input type="number" id="odometerStart" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Odometer End (km)</label>
+<div class="input-icon">
+<i class="fas fa-gauge"></i>
+<input type="number" id="odometerEnd" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Fuel Purchased (L)</label>
+<div class="input-icon">
+<i class="fas fa-gas-pump"></i>
+<input type="number" id="fuelAmount" step="0.01" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Fuel Cost ($)</label>
+<div class="input-icon">
+<i class="fas fa-dollar-sign"></i>
+<input type="number" id="fuelCost" step="0.01" min="0" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>Notes</label>
+<div class="input-icon">
+<i class="far fa-note-sticky"></i>
+<input type="text" id="notes">
+</div>
+</div>
+
+<div class="buttons-group">
+<button type="submit" id="saveBtn"><i class="fas fa-save"></i> Save Entry</button>
+<button type="button" id="cancelEditBtn" class="btn-secondary" style="display:none">
+    <i class="fas fa-times"></i> Cancel Edit
+</button>
+</div>
+<input type="hidden" id="editId">
+</form>
+</div>
+
+<!-- RIGHT -->
+<div>
+<div class="card">
+<h2 class="card-title"><i class="fas fa-chart-bar"></i> Monthly Summary</h2>
+<div id="monthlyStats"></div>
+<div id="efficiencyStats"></div>
+</div>
+
+<div class="card">
+<h2 class="card-title"><i class="fas fa-history"></i> Recent Entries</h2>
+<div id="recentEntries"></div>
+</div>
+</div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="deleteModal" class="modal confirmation-modal">
+<div class="modal-content">
+<h3><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
+<p>Are you sure you want to delete this entry? This action cannot be undone.</p>
+<div class="confirmation-buttons">
+<button id="confirmDeleteBtn" class="btn-danger"><i class="fas fa-trash"></i> Delete</button>
+<button id="cancelDeleteBtn" class="btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+</div>
+</div>
+</div>
+
+<footer>
+<p>&copy; <span id="currentYear"></span> Vehicle Fuel & Mileage Tracker</p>
+</footer>
+
+<script>
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+document.getElementById('date').valueAsDate = new Date();
+
+let vehicleData = JSON.parse(localStorage.getItem('vehicleData')) || [];
+let entryToDelete = null;
+let isEditing = false;
+
+document.getElementById('fuelForm').addEventListener('submit', e => {
+    e.preventDefault();
+
+    const start = +odometerStart.value;
+    const end = +odometerEnd.value;
+
+    if(end <= start){
+        alert("Odometer end must be greater than start");
+        return;
+    }
+
+    const entry = {
+        id: isEditing ? +editId.value : Date.now(),
+        date: date.value,
+        registrationPlate: registrationPlate.value,
+        odometerStart: start,
+        odometerEnd: end,
+        fuelAmount: +fuelAmount.value,
+        fuelCost: +fuelCost.value,
+        kilometersDriven: end - start,
+        notes: notes.value,
+        fuelEfficiency: ((end - start) / +fuelAmount.value).toFixed(2)
+    };
+
+    if (isEditing) {
+        // Update existing entry
+        const index = vehicleData.findIndex(e => e.id === entry.id);
+        if (index !== -1) {
+            vehicleData[index] = entry;
+        }
+        // Reset form to add mode
+        cancelEdit();
+    } else {
+        // Add new entry
+        vehicleData.push(entry);
+    }
+
+    localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+    fuelForm.reset();
+    date.valueAsDate = new Date();
+    
+    renderMonthlyStats();
+    renderRecentEntries();
+});
+
+function cancelEdit() {
+    isEditing = false;
+    document.getElementById('editId').value = '';
+    document.getElementById('saveBtn').innerHTML = '<i class="fas fa-save"></i> Save Entry';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+    fuelForm.reset();
+    date.valueAsDate = new Date();
+}
+
+function editEntry(id) {
+    const entry = vehicleData.find(e => e.id === id);
+    if (!entry) return;
+
+    isEditing = true;
+    document.getElementById('editId').value = entry.id;
+    document.getElementById('date').value = entry.date;
+    document.getElementById('registrationPlate').value = entry.registrationPlate;
+    document.getElementById('odometerStart').value = entry.odometerStart;
+    document.getElementById('odometerEnd').value = entry.odometerEnd;
+    document.getElementById('fuelAmount').value = entry.fuelAmount;
+    document.getElementById('fuelCost').value = entry.fuelCost;
+    document.getElementById('notes').value = entry.notes || '';
+    
+    document.getElementById('saveBtn').innerHTML = '<i class="fas fa-edit"></i> Update Entry';
+    document.getElementById('cancelEditBtn').style.display = 'flex';
+}
+
+function deleteEntry(id) {
+    entryToDelete = id;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    if (entryToDelete) {
+        vehicleData = vehicleData.filter(e => e.id !== entryToDelete);
+        localStorage.setItem('vehicleData', JSON.stringify(vehicleData));
+        renderMonthlyStats();
+        renderRecentEntries();
+        entryToDelete = null;
+    }
+    document.getElementById('deleteModal').style.display = 'none';
+});
+
+document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+    document.getElementById('deleteModal').style.display = 'none';
+    entryToDelete = null;
+});
+
+document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+
+// Close modal when clicking outside
+window.addEventListener('click', (e) => {
+    if (e.target.id === 'deleteModal') {
+        document.getElementById('deleteModal').style.display = 'none';
+        entryToDelete = null;
+    }
+});
+
+function calculateEfficiency() {
+    if (!vehicleData.length) return null;
+    
+    let totalKm = 0;
+    let totalFuel = 0;
+    let totalCost = 0;
+    
+    vehicleData.forEach(e => {
+        totalKm += e.kilometersDriven;
+        totalFuel += e.fuelAmount;
+        totalCost += e.fuelCost;
+    });
+    
+    if (totalFuel === 0) return null;
+    
+    const avgEfficiency = totalKm / totalFuel;
+    const costPerKm = totalCost / totalKm;
+    
+    return {
+        avgEfficiency: avgEfficiency.toFixed(2),
+        costPerKm: costPerKm.toFixed(2)
+    };
+}
+
+function renderMonthlyStats(){
+    const container = document.getElementById('monthlyStats');
+    const efficiencyContainer = document.getElementById('efficiencyStats');
+
+    if(!vehicleData.length){
+        container.innerHTML = `<div class="no-data">No trips logged</div>`;
+        efficiencyContainer.innerHTML = '';
+        return;
+    }
+
+    let km=0, fuel=0, cost=0;
+    vehicleData.forEach(e=>{
+        km+=e.kilometersDriven;
+        fuel+=e.fuelAmount;
+        cost+=e.fuelCost;
+    });
+
+    container.innerHTML=`
+    <div class="summary-stats">
+        <div class="stat-box"><div class="stat-value">${km}</div><div class="stat-label">KM Driven</div></div>
+        <div class="stat-box"><div class="stat-value">${fuel.toFixed(1)}</div><div class="stat-label">Liters Used</div></div>
+        <div class="stat-box"><div class="stat-value">$${cost.toFixed(2)}</div><div class="stat-label">Fuel Cost</div></div>
+    </div>`;
+    
+    // Calculate and display fuel efficiency
+    const efficiency = calculateEfficiency();
+    if (efficiency) {
+        efficiencyContainer.innerHTML = `
+        <div class="efficiency-box">
+            <div class="stat-value">${efficiency.avgEfficiency} km/L</div>
+            <div class="stat-label">Average Fuel Efficiency</div>
+            <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                <i class="fas fa-dollar-sign"></i> ${efficiency.costPerKm} per km
+            </div>
+        </div>`;
+    } else {
+        efficiencyContainer.innerHTML = '';
+    }
+}
+
+function renderRecentEntries(){
+    const c = document.getElementById('recentEntries');
+
+    if(!vehicleData.length){
+        c.innerHTML = `<div class="no-data">No trips logged yet</div>`;
+        return;
+    }
+
+    const rows = [...vehicleData].reverse().slice(0,10).map(e => `
+        <tr>
+            <td>${e.date}</td>
+            <td>${e.registrationPlate}</td>
+            <td>${e.kilometersDriven} km</td>
+            <td>${e.fuelEfficiency || '0.00'} km/L</td>
+            <td>$${e.fuelCost.toFixed(2)}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn edit-btn" onclick="editEntry(${e.id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="action-btn delete-btn" onclick="deleteEntry(${e.id})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </td>
+        </tr>`).join('');
+
+    c.innerHTML=`
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Plate</th>
+                <th>Distance</th>
+                <th>Efficiency</th>
+                <th>Cost</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+    </table>`;
+}
+
+renderMonthlyStats();
+renderRecentEntries();
+
+</script>
+</body>
+</html>
